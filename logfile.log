@@ -1,0 +1,7 @@
+SUCCESS 20230921-083351 Backed up /home/ec2-user/environment/up.py to /home/ec2-user/environment/ictcert3/backups/up.py-20230921-083351
+SUCCESS 20230921-083845 Backed up /home/ec2-user/environment/up.py to /home/ec2-user/environment/ictcert3/backups/up.py-20230921-083845
+SUCCESS 20230921-084537 Backed up /home/ec2-user/environment/up.py to /home/ec2-user/environment/ictcert3/backup/up.py-20230921-084537
+FAILURE 20230921-084659error:Job not specified
+SUCCESS 20230921-084725 Backed up /home/ec2-user/environment/up.py to /home/ec2-user/environment/ictcert3/backup/up.py-20230921-084725
+SUCCESS 20230921-084741 Backed up /home/ec2-user/environment/up.py to /home/ec2-user/environment/ictcert3/backup/up.py-20230921-084741
+SUCCESS 20230921-084741 Backed up /home/ec2-user/environment/file1.txt to /home/ec2-user/environment/ictcert3/backup/file1.txt-20230921-084741

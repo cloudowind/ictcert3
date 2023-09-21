@@ -22,7 +22,7 @@ except:
             f.write(configdata)
             f.close()
      else :
-         print("script cannot run without a config file ... sorry. ")
+         print("script cannot run without a config file ... sorry. "); sys.exit()
          
 
 from backupconfig import jobs 
@@ -34,7 +34,7 @@ def HandleError(errorMessage,currentime):
     print(errorMessage)
     writeLogMessage(errorMessage, currentime,False)
     sendEmail(errorMessage)
-
+    sys.exit()
 
 def sendEmail(message):
     email = 'To: ' + smtp["recipient"] + '\n' + 'From: ' + smtp["sender"] + '\n' + 'Subject:Backup Error\n\n' + message + '\n'
@@ -101,7 +101,7 @@ def main():
                newbackupPath = input("please specify the fullname to create in the current folder or the full path for thew new backup folder or just folder name for to be created into current folder: ")
                try:      os.mkdir(newbackupPath)
                except    (FileNotFoundError,FileExistsError) as err_o:
-                    print("an error occured while trying to create the new back up folder maybe it already exists?but new directory name has been registered in config file ");HandleError("Destination doesn't exist and couldn't create one ", currentime)
+                    print("an error occured while trying to create the new back up folder maybe it already exists?but new directory name has been registered in config file ");HandleError("Destination doesn't exist and couldn't create one ", currentime); sys.exit()
                print("New Backup Directory "+newbackupPath+" has succesfully been created and registered in backupconfig.py... please re-run the script\n ")
                f = open("backupconfig.py",'r')
                filedata = f.read()
