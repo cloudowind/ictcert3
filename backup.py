@@ -1,4 +1,11 @@
 #!/usr/bin/python3
+"""
+program:backup
+Author:Cagdas C. 
+Version :1.0
+
+Program to backup seqeunce of one or more files into directories defined in config files 
+"""
 import os 
 import math
 import sys
@@ -9,7 +16,7 @@ import shutil
 import smtplib
 from pathlib import PurePath
 from datetime import datetime
-try: 
+try:                                #try if module exists before importing , if not create one 
      from backupconfig import destinationDir
 except:  
      userinputconfig = input("Config file does not exist ! do  you want to create one into the cwd ? (type 'yes' , or 'no:') ")
@@ -22,7 +29,7 @@ except:
             f.write(configdata)
             f.close()
      else :
-         print("script cannot run without a config file ... sorry. ")
+         print("script cannot run without a config file ... sorry. "); sys.exit()
          
 
 from backupconfig import jobs 
@@ -31,12 +38,27 @@ from backupconfig import thisDir
 from backupconfig import logfile ,smtp
 
 def HandleError(errorMessage,currentime):
+
+    """
+    Handles every Error in the program 
+    
+    Arguments:
+    errorMessage:str
+    currentime:str 
+    """
     print(errorMessage)
     writeLogMessage(errorMessage, currentime,False)
     sendEmail(errorMessage)
-
+    sys.exit()
 
 def sendEmail(message):
+    
+    
+    """
+    Sends an email to the defined recipient in backup config file
+    Arguments:
+    message: str- messaged to be emailed 
+    """
     email = 'To: ' + smtp["recipient"] + '\n' + 'From: ' + smtp["sender"] + '\n' + 'Subject:Backup Error\n\n' + message + '\n'
      
     try:
@@ -50,6 +72,15 @@ def sendEmail(message):
     except Exception as error:
         print("Error while sending email ")
 
+
+    """
+    writes log messages to the log file
+    
+    Arguments:
+    logmessage: str- messaged to be emailed 
+    currentime: str
+    isSuccess :True/False-boolean 
+    """
 def writeLogMessage(logMessage,currentime,isSuccess):
     try :
         file = open(logfile,"a")
@@ -78,30 +109,30 @@ def main():
         if argCount < 2:
             HandleError("error:Job not specified",currentime)
         else:
-          for jobname in sys.argv[1:]:
+            jobname = sys.argv[1]
             if not(jobname in jobs):
                 HandleError(f" Error : job {jobname} is not in job list",currentime)
                 #print(f"Error: job: {jobname} is not in job list")
                 
-            jobsPath = jobs[jobname]
-            print(jobsPath)
-            if not os.path.exists(jobsPath):
-               HandleError("Source doesn't exists", currentime)
-               print("ERROR: file " +jobs[jobname]  + " does not exist to be backed up.")
+        jobsPath = jobs[jobname]
+        print(jobsPath)
+        if not os.path.exists(jobsPath):
+           HandleError("Source doesn't exists", currentime)
+           print("ERROR: file " +jobs[jobname]  + " does not exist to be backed up.")
        
      
         
       
-            destDir=destinationDir
-            print("destination directory:" + destinationDir)
-            if not os.path.exists(destDir):
-              print("ERROR: Backup  folder: " +destDir  + " unfortunetly does not exists")
-              userinput = input("did you want to create one ? (type 'yes' , or 'no:') ")
-              if userinput == "yes":
+        destDir=destinationDir
+        print("destination directory:" + destinationDir)
+        if not os.path.exists(destDir):
+           print("ERROR: Backup  folder: " +destDir  + " unfortunetly does not exists")
+           userinput = input("did you want to create one ? (type 'yes' , or 'no:') ")
+           if userinput == "yes":
                newbackupPath = input("please specify the fullname to create in the current folder or the full path for thew new backup folder or just folder name for to be created into current folder: ")
                try:      os.mkdir(newbackupPath)
                except    (FileNotFoundError,FileExistsError) as err_o:
-                    print("an error occured while trying to create the new back up folder maybe it already exists?but new directory name has been registered in config file ");HandleError("Destination doesn't exist and couldn't create one ", currentime)
+                    print("an error occured while trying to create the new back up folder maybe it already exists?but new directory name has been registered in config file ");HandleError("Destination doesn't exist and couldn't create one ", currentime); sys.exit()
                print("New Backup Directory "+newbackupPath+" has succesfully been created and registered in backupconfig.py... please re-run the script\n ")
                f = open("backupconfig.py",'r')
                filedata = f.read()
@@ -110,22 +141,22 @@ def main():
                f = open("backupconfig.py",'w')
                f.write(newdata)
                f.close()
-              else:
-                print("cannot prooced withouth a backup folder ") 
-            else:
-                 now = datetime.now() # current date and time
-                 timestamp = now.strftime("%Y%m%d-%H%M%S")
-                 print("timestamp:", timestamp)
-                 srcPath = pathlib.PurePath(jobsPath)
-                 destlock = destDir + "/" + srcPath.name + "-" + timestamp
-            if pathlib.Path(jobsPath).is_dir():
+           else:
+               print("cannot prooced withouth a backup folder ") 
+        else:
+     
+           now = datetime.now() # current date and time
+           timestamp = now.strftime("%Y%m%d-%H%M%S")
+           print("timestamp:", timestamp)
+           srcPath = pathlib.PurePath(jobsPath)
+           destlock = destDir + "/" + srcPath.name + "-" + timestamp
+           if pathlib.Path(jobsPath).is_dir():
                  
                 try: shutil.copytree(jobsPath,destlock)
                 except (FileNotFoundError,FileExistsError) as err_o: 
                       HandleError("an error happend while copying folder", currentime)
                       #failedentryD =  "from : " + jobsPath + "       to     :" + os.getcwd() + destlock+  "     :  Failed\n"  ; f = open("log.py","a") ; f.write(failedentryD); f.close(); print("File could not been copied, failure notice has been registered to logs and Admin has been alerted");sys.exit()
-                Fdestlock=os.getcwd()+ "/" + destlock
-                writeLogMessage(f"Backed up {jobsPath} to {Fdestlock}", currentime, True) 
+                writeLogMessage(f"Backed up {jobsPath} to {destlock}", currentime, True) 
                 print("Folder has been backed up ")
                 #logenteryD = "from : " + jobsPath +"        to:    " + os.getcwd()  + destlock+   "     :  Success\n"
                 #try:    f = open("log.py",'a'); f.write(logenteryD);f.close()
@@ -133,15 +164,14 @@ def main():
                      # print("log file could not been processed  but backing up has been accomplished "); sys.exit()
                
                  
-            else :
+           else :
         
                 try: shutil.copy2(jobsPath,destlock)
                 except (FileNotFoundError,FileExistsError) as err_o:
                      HandleError("an error happend while copying file", currentime)
                     
                     #failedentry =  "from :  " + jobsPath + "       to:      " + os.getcwd() + destlock+  "      :   Failed\n"  ; f = open("log.py","a") ; f.write(failedentry); f.close(); print("File could not been copied, failure notice has been registered to logs and Admin has been alerted");sys.exit()
-                Ddestlock=os.getcwd()+ "/" +destlock
-                writeLogMessage(f"Backed up {jobsPath} to {Ddestlock}", currentime, True) 
+                writeLogMessage(f"Backed up {jobsPath} to {destlock}", currentime, True) 
                 print("file has been backuped up ")
                 #logentry = "from : " + jobsPath +"        to     :" + os.getcwd()  + destlock+    "      :  Success\n"
                 #try:      f = open("log.py",'a') ;   f.write(logentry) ; f.close()
